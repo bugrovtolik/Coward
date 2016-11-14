@@ -10,8 +10,8 @@ class Map extends MapClass {
 						new MapBorder(20,height,'images/border.png'), 
 						new MapBorder(width,20,'images/border.png'), 
 						new MapBorder(20,height,'images/border.png')];
-		this.borders[1].getSprite().position.x = width-20;
-		this.borders[2].getSprite().position.y = height-20;
+		this.borders[1].positionX = width-20;
+		this.borders[2].positionY = height-20;
 	}
 	getSprite() {
 		return this.sprite;
