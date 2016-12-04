@@ -1,5 +1,5 @@
 import PIXI from 'PIXI'
-import Movable from './Movable'
+import Bullet from './Bullet'
 
 class Map {
 	constructor(width, height, player, movableObjects) {
@@ -11,8 +11,14 @@ class Map {
 		this.dx = 0;
 		this.dy = 0;
 
+		this.bullets = [];
+		this.movableContainer = new PIXI.Container();
+		this.movableObjects.forEach(m => this.movableContainer.addChild(m.getSprite()));
+		this.unmovableContainer = new PIXI.Container();
+		this.unmovableContainer.addChild(this.player.getSprite());
 		this.container = new PIXI.Container();
-		this.movableObjects.forEach(m => this.container.addChild(m.getSprite()));
+		this.container.addChild(this.movableContainer);
+		this.container.addChild(this.unmovableContainer);
 
 		this.control = {
 			keyW: false,
@@ -23,21 +29,28 @@ class Map {
 		document.addEventListener('keydown', this.onKeyDown.bind(this));
 		document.addEventListener('keyup', this.onKeyUp.bind(this));
 		document.addEventListener('mousemove', this.rotatePlayer.bind(this));
-		//document.addEventListener('mousedown', this.shoot.bind(this));
+		document.addEventListener('mousedown', this.shoot.bind(this));
 	}
 
-	getMyContainer() {
-		var returnContainer = new PIXI.Container();
-		returnContainer.addChild(this.container);
-		returnContainer.addChild(this.player.getSprite());
-		return returnContainer;
+	getContainer() {
+		var tempCont = new PIXI.Container();
+		tempCont.addChild(this.container);
+		this.bullets.forEach(b => tempCont.addChild(b.getSprite()));
+		return tempCont;
 	}
 
 	tick() {
-		if(this.container.x + this.dx > (1024/2 - 32) || this.container.x + this.dx < (-this.width + 1024/2 + 32)) this.dx = 0;
-		if(this.container.y + this.dy > (600/2 - 32) || this.container.y + this.dy < (-this.height + 600/2 + 32)) this.dy = 0;
-		this.container.x += this.dx;
-		this.container.y += this.dy;
+		if(this.movableContainer.x + this.dx > (1024/2 - 32) || this.movableContainer.x + this.dx < (-this.width + 1024/2 + 32)) this.dx = 0;
+		if(this.movableContainer.y + this.dy > (600/2 - 32) || this.movableContainer.y + this.dy < (-this.height + 600/2 + 32)) this.dy = 0;
+		this.movableContainer.x += this.dx;
+		this.movableContainer.y += this.dy;
+
+		this.checkBulletsCollision();
+		for(var i = 0; i < this.bullets.length; i++)
+				{
+					this.bullets[i].x = this.bullets[i].getX() + this.bullets[i].getDx() + this.dx;
+					this.bullets[i].y = this.bullets[i].getY() + this.bullets[i].getDy() + this.dy;
+				}
 	}
 
 	onKeyDown(event) {
@@ -90,6 +103,27 @@ class Map {
 		var x = event.pageX - this.player.getX();
 		var y = event.pageY - this.player.getY();
 		this.player.getSprite().rotation = Math.atan2(y, x) + Math.PI/2;
+	}
+
+	shoot(event) {
+		var bullet = new Bullet('images/bulletimg.png',this.player.getX(),this.player.getY());
+		bullet.dx = Math.sin(this.player.getSprite().rotation) * 2;
+		bullet.dy = -Math.cos(this.player.getSprite().rotation) * 2;
+		this.bullets.push(bullet);
+	}
+
+	checkBulletsCollision() {
+		for(var i = 0; i < this.bullets.length; i++)
+		{
+			if (this.bullets[i].getX() <= this.movableContainer.x ||
+				this.bullets[i].getX() >= this.movableContainer.x + this.width ||
+				this.bullets[i].getY() <= this.movableContainer.y ||
+				this.bullets[i].getY() >= this.movableContainer.y + this.height) {
+				this.bullets.splice(i,1);
+				i--;
+				break;
+			}
+		}
 	}
 }
 

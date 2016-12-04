@@ -2,8 +2,6 @@ import PIXI from "PIXI"
 
 class Game {
 	constructor(map) {
-		this.container = new PIXI.Container();
-		this.container.addChild(map.getMyContainer());
 		this.map = map;
 
 		this.renderer = PIXI.autoDetectRenderer(1024, 600,{backgroundColor : 0xffffff});
@@ -15,7 +13,7 @@ class Game {
 	}
 
 	getContainer() {
-		return this.container;
+		return this.map.getContainer();
 	}
 
 	start() {

@@ -22,10 +22,10 @@ class MapObject {
 	getY() {
 		return this.sprite.position.y;
 	}
-	set positionX(value) {
+	set x(value) {
 		this.sprite.position.x = value;
 	}
-	set positionY(value) {
+	set y(value) {
 		this.sprite.position.y = value;
 	}
 }
